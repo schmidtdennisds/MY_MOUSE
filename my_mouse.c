@@ -252,6 +252,12 @@ int main (int argc, char** argv) {
 
     int solution_count = print_solution_path(maze, queue_end_points->first->point);
 
+    while (queue_end_points->first->next != NULL) {
+        free(queue_end_points->first->point);
+        queue_end_points->first = queue_end_points->first->next;
+    }
+    free (queue_end_points);
+
     maze->map[entry_point->y][entry_point->x] = maze->fields->entry;
     maze->map[exit_point->y][exit_point->x] = maze->fields->exit;
 
@@ -259,6 +265,10 @@ int main (int argc, char** argv) {
     printf("%dx%d%c%c%c%c%c\n", maze->rows, maze->cols, fields->wall, fields->empty, fields->path, fields->entry, fields->exit);
     print_maze(maze);
     printf("%d STEPS!\n", solution_count);
+
+    free(maze->map);
+    free(maze->fields);
+    free(maze);
     
     return 0;
 }
