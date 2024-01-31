@@ -26,6 +26,7 @@ typedef struct s_maze {
 typedef struct s_point {
     int x;
     int y;
+    struct s_point* previous;
 } point;
 
 typedef struct s_queue {
@@ -160,7 +161,7 @@ queue* add_point_to_queue(queue* end_of_queue, point* point) {
 
 queue* add_possible_steps_to_queue(queue* start_of_queue, maze* maze) {
     point* visited_point = start_of_queue->point;
-    maze->map[visited_point->y][visited_point->x] = maze->fields->path;
+    //maze->map[visited_point->y][visited_point->x] = maze->fields->path;
 
     queue* end_of_queue = start_of_queue;
     while (end_of_queue->next != NULL) {
@@ -170,18 +171,22 @@ queue* add_possible_steps_to_queue(queue* start_of_queue, maze* maze) {
     point* up = malloc(sizeof(point));
     up->x = visited_point->x;
     up->y = visited_point->y - 1;
+    up->previous = visited_point;
 
     point* left = malloc(sizeof(point));
     left->x = visited_point->x - 1;
     left->y = visited_point->y;
+    left->previous = visited_point;
 
     point* right = malloc(sizeof(point));
     right->x = visited_point->x + 1;
     right->y = visited_point->y;
+    right->previous = visited_point;
 
     point* down = malloc(sizeof(point));
     down->x = visited_point->x;
     down->y = visited_point->y + 1;
+    down->previous = visited_point;
 
 
     if (is_point_empty(maze, up)) {
@@ -203,6 +208,16 @@ queue* add_possible_steps_to_queue(queue* start_of_queue, maze* maze) {
     return start_of_queue->next;
 }
 
+int print_solution_path(maze* maze, point* end_point) {
+    int count = 0;
+    while (end_point->previous != NULL) {
+        maze->map[end_point->y][end_point->x] = maze->fields->path;
+        end_point = end_point->previous;
+        count++;
+    }
+    return count - 1;
+}
+
 int main (int argc, char** argv) {
     if (argc != 2) {
         printf(ERROR);
@@ -213,6 +228,7 @@ int main (int argc, char** argv) {
     //print_maze(maze);
 
     point* entry_point = search_for_entry(maze);
+    entry_point->previous = NULL;
     //printf("Entry (%d,%d)\n", entry_point->x, entry_point->y);
 
     point* exit_point = search_for_exit(maze);
@@ -224,13 +240,19 @@ int main (int argc, char** argv) {
 
     while(queue->point->x != exit_point->x || queue->point->y != exit_point->y) {
         queue = add_possible_steps_to_queue(queue, maze);
-        print_maze(maze);
-        sleep(1);
+        //print_maze(maze);
+        //sleep(1);
     }
 
-    maze->map[entry_point->y][entry_point->x] = maze->fields->entry;
+    int solution_count = print_solution_path(maze, queue->point);
 
+    maze->map[entry_point->y][entry_point->x] = maze->fields->entry;
+    maze->map[exit_point->y][exit_point->x] = maze->fields->exit;
+
+    fields* fields = maze->fields;
+    printf("%dx%d%c%c%c%c%c\n", maze->rows, maze->cols, fields->wall, fields->empty, fields->path, fields->entry, fields->exit);
     print_maze(maze);
+    printf("%d STEPS!\n", solution_count);
     
     return 0;
 }
