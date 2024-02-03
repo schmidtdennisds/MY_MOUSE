@@ -2,22 +2,27 @@
 ***
 
 ## Task
-TODO - What is the problem? And where is the challenge?
+The challenge is to develop an algorithm which finds the shortest way between an entry and exit in a labyrinth.
 
 ## Description
-TODO - How have you solved the problem?
+I solved the problem by implementing an breadth first search.
 
 ## Installation
-TODO - How to install your project? npm install? make? make re?
+To install the project run make.
 
 ## Usage
-TODO - How does it work?
+You can use the maze_generator.rb script to generate a map:
 ```
-./my_project argument1 argument2
+./ruby maze_generator.rb 100 100 "* o12" > test.map
+```
+and then run the my_mouse with:
+```
+make
+./my_mouse test.map
 ```
 
 ### The Core Team
-
+Dennis Schmidt
 
 <span><i>Made at <a href='https://qwasar.io'>Qwasar SV -- Software Engineering School</a></i></span>
-<span><img alt='Qwasar SV -- Software Engineering School's Logo' src='https://storage.googleapis.com/qwasar-public/qwasar-logo_50x50.png' width='20px' /></span>
+<span><img alt='Qwasar SV -- Software Engineering Schools Logo' src='https://storage.googleapis.com/qwasar-public/qwasar-logo_50x50.png' width='20px' /></span>

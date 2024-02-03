@@ -1,45 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdbool.h>
-#include <unistd.h>
-
-#define ERROR "MAP ERROR"
-#define MAX_LINE_LENGTH 1000
-
-typedef struct s_fields {
-    char wall;
-    char empty;
-    char path;
-    char entry;
-    char exit;
-    char visited;
-    char in_queue;
-} fields;
-
-typedef struct s_maze {
-    int rows;
-    int cols;
-    fields* fields;
-    char** map;
-} maze;
-
-typedef struct s_point {
-    int x;
-    int y;
-    struct s_point* previous;
-} point;
-
-typedef struct s_queue {
-    point* point;
-    struct s_queue* next;
-} queue;
-
-typedef struct s_queue_end_points {
-    queue* first;
-    queue* last;
-} queue_end_points;
+#include "my_mouse.h"
 
 void parse_first_line(maze* maze, char* line) {
     fields* fields = malloc(sizeof(fields));
@@ -81,7 +40,7 @@ maze* read_map_file(char* filename) {
     file = fopen(filename, "r");
 
     if (file == NULL) {
-        printf(ERROR);
+        fprintf(stderr, ERROR);
         return NULL;
     }
 
@@ -136,7 +95,7 @@ point* search_for_entry(maze* maze) {
             }
         }
     }
-    printf(ERROR);
+    fprintf(stderr, ERROR);
     return NULL;
 }
 
@@ -151,7 +110,7 @@ point* search_for_exit(maze* maze) {
             }
         }
     }
-    printf(ERROR);
+    fprintf(stderr, ERROR);
     return NULL;
 }
 
@@ -242,18 +201,27 @@ int print_solution_path(maze* maze, point* end_point) {
 
 int main (int argc, char** argv) {
     if (argc != 2) {
-        printf(ERROR);
+        fprintf(stderr, ERROR);
         return 1;
     }
 
     maze* maze = read_map_file(argv[1]);
+    if (maze == NULL) {
+        return 1;
+    }
     //print_maze(maze);
 
     point* entry_point = search_for_entry(maze);
+    if (entry_point == NULL) {
+        return 1;
+    }
     entry_point->previous = NULL;
     //printf("Entry (%d,%d)\n", entry_point->x, entry_point->y);
 
     point* exit_point = search_for_exit(maze);
+    if (exit_point == NULL) {
+        return 1;
+    }
     //printf("Entry (%d,%d)\n", exit_point->x, exit_point->y);
 
     queue* queue = malloc(sizeof(queue));

@@ -1,7 +1,7 @@
 all : my_mouse
 
 my_mouse : my_mouse.c
-	gcc -o my_mouse my_mouse.c
+	gcc -o my_mouse my_mouse.c -I.
 
 clean:
 	rm -f *.o
