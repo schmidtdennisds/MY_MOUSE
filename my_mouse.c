@@ -14,6 +14,7 @@ typedef struct s_fields {
     char path;
     char entry;
     char exit;
+    char visited;
 } fields;
 
 typedef struct s_maze {
@@ -46,19 +47,19 @@ void parse_first_line(maze* maze, char* line) {
         index++;
     }
     char* rows_symbols = malloc(sizeof(char) * (index + 1));
-    strncpy(rows_symbols, line, index);
-    rows_symbols[++index] = '\n';
+    strncpy(rows_symbols, line, index + 1);
+    rows_symbols[index] = '\0';
     //printf("Rows_symbols: %s\n", rows_symbols);
     maze -> rows = atoi(rows_symbols);
-    int start = index;
+    int start = ++index;
     int length = 0;
     while (isdigit(line[index])) {
         length++;
         index++;
     }
     char* cols_symbols = malloc(sizeof(char) * (length + 1));
-    strncpy(cols_symbols, line + start, length);
-    cols_symbols[length] = '\n';
+    strncpy(cols_symbols, line + start, length + 1);
+    cols_symbols[length] = '\0';
     //printf("Cols_symbols: %s\n", cols_symbols);
     maze -> cols = atoi(cols_symbols);
     fields -> wall = line[index++];
@@ -66,6 +67,7 @@ void parse_first_line(maze* maze, char* line) {
     fields -> path = line[index++];
     fields -> entry = line[index++];
     fields -> exit = line[index];
+    fields -> visited = '#';
     maze -> fields = fields;
 }
 
@@ -108,6 +110,16 @@ void print_maze(maze* maze) {
             printf("%c", maze->map[i][k]);
         }
         printf("\n");
+    }
+}
+
+void delete_visited_points_from_maze(maze* maze) {
+    for (int i = 0; i < maze->rows; i++) {
+        for (int k = 0; k < maze->cols; k++) {
+            if (maze->map[i][k] == maze->fields->visited) {
+                maze->map[i][k] = maze->fields->empty;
+            }
+        }
     }
 }
 
@@ -166,7 +178,7 @@ queue_end_points* add_point_to_queue(queue_end_points* queue_end_points, point* 
 
 queue_end_points* add_possible_steps_to_queue(queue_end_points* queue_end_points, maze* maze) {
     point* visited_point = queue_end_points->first->point;
-    //maze->map[visited_point->y][visited_point->x] = maze->fields->path;
+    maze->map[visited_point->y][visited_point->x] = maze->fields->visited;
 
     point* up = malloc(sizeof(point));
     up->x = visited_point->x;
@@ -260,6 +272,7 @@ int main (int argc, char** argv) {
 
     maze->map[entry_point->y][entry_point->x] = maze->fields->entry;
     maze->map[exit_point->y][exit_point->x] = maze->fields->exit;
+    delete_visited_points_from_maze(maze);
 
     fields* fields = maze->fields;
     printf("%dx%d%c%c%c%c%c\n", maze->rows, maze->cols, fields->wall, fields->empty, fields->path, fields->entry, fields->exit);
