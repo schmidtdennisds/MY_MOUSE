@@ -15,6 +15,7 @@ typedef struct s_fields {
     char entry;
     char exit;
     char visited;
+    char in_queue;
 } fields;
 
 typedef struct s_maze {
@@ -68,6 +69,7 @@ void parse_first_line(maze* maze, char* line) {
     fields -> entry = line[index++];
     fields -> exit = line[index];
     fields -> visited = '#';
+    fields -> in_queue = '?';
     maze -> fields = fields;
 }
 
@@ -116,7 +118,7 @@ void print_maze(maze* maze) {
 void delete_visited_points_from_maze(maze* maze) {
     for (int i = 0; i < maze->rows; i++) {
         for (int k = 0; k < maze->cols; k++) {
-            if (maze->map[i][k] == maze->fields->visited) {
+            if (maze->map[i][k] == maze->fields->visited || maze->map[i][k] == maze->fields->in_queue) {
                 maze->map[i][k] = maze->fields->empty;
             }
         }
@@ -155,19 +157,26 @@ point* search_for_exit(maze* maze) {
 
 bool is_point_empty(maze* maze, point* point) {
     if (point->x < 0 || point->x > maze->cols || point->y < 0 || point->y > maze-> rows) {
+        free(point);
         return false;
     }
+    if (maze->map[point->y][point->x] == maze->fields->visited) {
+        free(point);
+        return false;
+    } 
 
     if (maze->map[point->y][point->x] == maze->fields->empty) {
         return true;
     } else if (maze->map[point->y][point->x] == maze->fields->exit) {
         return true;
     } else {
+        free(point);
         return false;
     }
 }
 
-queue_end_points* add_point_to_queue(queue_end_points* queue_end_points, point* point) {
+queue_end_points* add_point_to_queue(maze* maze, queue_end_points* queue_end_points, point* point) {
+    maze->map[point->y][point->x] = maze->fields->in_queue;
     queue* new_end_of_queue = malloc(sizeof(queue));
     new_end_of_queue->point = point;
     new_end_of_queue->next= NULL;
@@ -203,18 +212,18 @@ queue_end_points* add_possible_steps_to_queue(queue_end_points* queue_end_points
 
     if (is_point_empty(maze, up)) {
         //printf("up\n");
-        queue_end_points = add_point_to_queue(queue_end_points, up);
+        queue_end_points = add_point_to_queue(maze, queue_end_points, up);
     } 
     if (is_point_empty(maze, left)) {
         //printf("left\n");
-        queue_end_points = add_point_to_queue(queue_end_points, left);
+        queue_end_points = add_point_to_queue(maze, queue_end_points, left);
     }
     if (is_point_empty(maze, right)) {
         //printf("right\n");
-        queue_end_points = add_point_to_queue(queue_end_points, right);
+        queue_end_points = add_point_to_queue(maze, queue_end_points, right);
     }if (is_point_empty(maze, down)) {
         //printf("down\n");
-        queue_end_points = add_point_to_queue(queue_end_points, down);
+        queue_end_points = add_point_to_queue(maze, queue_end_points, down);
     }
 
     queue_end_points->first = queue_end_points->first->next;
